@@ -24,6 +24,39 @@ test_json_nodes <<<"$output" \
                 'crypto:[0][0][0]["crypto"]={"decrypted": {"status": "full", "header-mask": {"Subject": "Subject Unavailable"}}}' \
                 'subject:[0][0][0]["headers"]["Subject"]="This is a protected header"'
 
+test_begin_subtest "verify spoofed date is shown without decryption"
+output=$(notmuch show --format=json id:spoofed-date@crypto.notmuchmail.org)
+test_json_nodes <<<"$output" \
+                'subject:[0][0][0]["headers"]["Date"]="Sat, 01 Jan 2000 12:00:00 +0000"'
+
+test_begin_subtest "verify real date is shown with decryption"
+test_subtest_known_broken
+output=$(notmuch show --decrypt=true --format=json id:spoofed-date@crypto.notmuchmail.org)
+test_json_nodes <<<"$output" \
+                'subject:[0][0][0]["headers"]["Date"]="Wed, 16 Dec 2015 17:19:18 +0100"'
+
+test_begin_subtest "verify spoofed recipient is shown without decryption"
+output=$(notmuch show --format=json id:spoofed-recipient@crypto.notmuchmail.org)
+test_json_nodes <<<"$output" \
+                'subject:[0][0][0]["headers"]["To"]="undisclosed-recipients: ;"'
+
+test_begin_subtest "verify real recipient is shown with decryption"
+test_subtest_known_broken
+output=$(notmuch show --decrypt=true --format=json id:spoofed-recipient@crypto.notmuchmail.org)
+test_json_nodes <<<"$output" \
+                'subject:[0][0][0]["headers"]["To"]="Notmuch Test Suite <test_suite@notmuchmail.org>"'
+
+test_begin_subtest "verify spoofed sender is shown without decryption"
+output=$(notmuch show --format=json id:spoofed-sender@crypto.notmuchmail.org)
+test_json_nodes <<<"$output" \
+                'subject:[0][0][0]["headers"]["From"]="test_suite@notmuchmail.org"'
+
+test_begin_subtest "verify real sender is shown with decryption"
+test_subtest_known_broken
+output=$(notmuch show --decrypt=true --format=json id:spoofed-sender@crypto.notmuchmail.org)
+test_json_nodes <<<"$output" \
+                'subject:[0][0][0]["headers"]["From"]="Notmuch Test Suite <test_suite@notmuchmail.org>"'
+
 test_begin_subtest "when no external header is present, show masked subject as null"
 output=$(notmuch show --decrypt=true --format=json id:subjectless-protected-header@crypto.notmuchmail.org)
 test_json_nodes <<<"$output" \
@@ -87,7 +120,7 @@ test_begin_subtest "protected subject is not indexed by default"
 output=$(notmuch search --output=messages 'subject:"This is a protected header"')
 test_expect_equal "$output" ''
 
-test_begin_subtest "reindex message with protected header"
+test_begin_subtest "reindex message with protected subject"
 test_expect_success 'notmuch reindex --decrypt=true id:protected-header@crypto.notmuchmail.org'
 
 test_begin_subtest "protected subject is indexed when cleartext is indexed"
@@ -104,6 +137,45 @@ output=$(notmuch reply --format=json 'id:protected-header@crypto.notmuchmail.org
 test_json_nodes <<<"$output" \
                 'subject:["original"]["headers"]["Subject"]="This is a protected header"' \
                 'reply-subject:["reply-headers"]["Subject"]="Re: Subject Unavailable"'
+
+test_begin_subtest "spoofed date is used when cleartext is not indexed"
+output=$(notmuch search --output=messages 'id:spoofed-date@crypto.notmuchmail.org and date:2000-01-01')
+test_expect_equal "$output" 'id:spoofed-date@crypto.notmuchmail.org'
+
+test_begin_subtest "real date is masked when cleartext is not indexed"
+output=$(notmuch search --output=messages 'id:spoofed-date@crypto.notmuchmail.org and date:2015-12-16')
+test_expect_equal "$output" ''
+
+test_begin_subtest "real recipient is masked when cleartext is not indexed"
+output=$(notmuch search --output=messages 'id:spoofed-recipient@crypto.notmuchmail.org and to:"Notmuch Test Suite"')
+test_expect_equal "$output" ''
+
+test_begin_subtest "real sender is masked when cleartext is not indexed"
+output=$(notmuch search --output=messages 'id:spoofed-sender@crypto.notmuchmail.org and from:"Notmuch Test Suite"')
+test_expect_equal "$output" ''
+
+test_begin_subtest "reindex messages with spoofed headers"
+test_expect_success 'notmuch reindex --decrypt=true id:spoofed-date@crypto.notmuchmail.org or id:spoofed-recipient@crypto.notmuchmail.org or id:spoofed-sender@crypto.notmuchmail.org'
+
+test_begin_subtest "spoofed date is ignored when cleartext is indexed"
+test_subtest_known_broken
+output=$(notmuch search --output=messages 'id:spoofed-date@crypto.notmuchmail.org and date:2000-01-01')
+test_expect_equal "$output" ''
+
+test_begin_subtest "real date is used when cleartext is indexed"
+test_subtest_known_broken
+output=$(notmuch search --output=messages 'id:spoofed-date@crypto.notmuchmail.org and date:2015-12-16')
+test_expect_equal "$output" 'id:spoofed-date@crypto.notmuchmail.org'
+
+test_begin_subtest "real recipient is used when cleartext is indexed"
+test_subtest_known_broken
+output=$(notmuch search --output=messages 'id:spoofed-recipient@crypto.notmuchmail.org and to:"Notmuch Test Suite"')
+test_expect_equal "$output" 'id:spoofed-recipient@crypto.notmuchmail.org'
+
+test_begin_subtest "real sender is used when cleartext is indexed"
+test_subtest_known_broken
+output=$(notmuch search --output=messages 'id:spoofed-sender@crypto.notmuchmail.org and from:"Notmuch Test Suite"')
+test_expect_equal "$output" 'id:spoofed-sender@crypto.notmuchmail.org'
 
 test_begin_subtest "verify correct protected header when submessage exists"
 output=$(notmuch show --decrypt=true --format=json id:encrypted-message-with-forwarded-attachment@crypto.notmuchmail.org)
@@ -134,6 +206,9 @@ test_expect_equal "$output" 'id:encrypted-signed-not-masked@crypto.notmuchmail.o
 id:encrypted-signed@crypto.notmuchmail.org
 id:nested-rfc822-message@crypto.notmuchmail.org
 id:protected-header@crypto.notmuchmail.org
+id:spoofed-date@crypto.notmuchmail.org
+id:spoofed-recipient@crypto.notmuchmail.org
+id:spoofed-sender@crypto.notmuchmail.org
 id:subjectless-protected-header@crypto.notmuchmail.org'
 
 test_begin_subtest "when rendering protected headers, avoid rendering legacy-display part"

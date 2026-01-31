@@ -130,6 +130,12 @@ _notmuch_message_crypto_destructor (_notmuch_message_crypto_t *msg_crypto)
 	talloc_free (msg_crypto->payload_date);
     if (msg_crypto->payload_autocrypt)
 	talloc_free (msg_crypto->payload_autocrypt);
+    if (msg_crypto->payload_message_id)
+	talloc_free (msg_crypto->payload_message_id);
+    if (msg_crypto->payload_in_reply_to)
+	talloc_free (msg_crypto->payload_in_reply_to);
+    if (msg_crypto->payload_references)
+	talloc_free (msg_crypto->payload_references);
     return 0;
 }
 
@@ -187,6 +193,9 @@ _notmuch_message_crypto_potential_payload (_notmuch_message_crypto_t *msg_crypto
     const char *reply_to = NULL;
     const char *date = NULL;
     const char *autocrypt = NULL;
+    const char *message_id = NULL;
+    const char *in_reply_to = NULL;
+    const char *references = NULL;
 
     if ((! msg_crypto) || (! part))
 	INTERNAL_ERROR ("_notmuch_message_crypto_potential_payload() got NULL for %s\n",
@@ -248,6 +257,9 @@ _notmuch_message_crypto_potential_payload (_notmuch_message_crypto_t *msg_crypto
 	    reply_to = g_mime_object_get_header (part, "Reply-To");
 	    date = g_mime_object_get_header (part, "Date");
 	    autocrypt = g_mime_object_get_header (part, "Autocrypt");
+	    message_id = g_mime_object_get_header (part, "Message-ID");
+	    in_reply_to = g_mime_object_get_header (part, "In-Reply-To");
+	    references = g_mime_object_get_header (part, "References");
 	    /* FIXME: possibly add even more headers at some point */
 	} else if (protected_headers && strcasecmp ("v1", protected_headers) == 0) {
 	    subject = g_mime_object_get_header (part, "Subject");
@@ -309,6 +321,21 @@ _notmuch_message_crypto_potential_payload (_notmuch_message_crypto_t *msg_crypto
 	if (msg_crypto->payload_autocrypt)
 	    talloc_free (msg_crypto->payload_autocrypt);
 	msg_crypto->payload_autocrypt = talloc_strdup (msg_crypto, autocrypt);
+	}
+    if (message_id) {
+	if (msg_crypto->payload_message_id)
+	    talloc_free (msg_crypto->payload_message_id);
+	msg_crypto->payload_message_id = talloc_strdup (msg_crypto, message_id);
+    }
+    if (in_reply_to) {
+	if (msg_crypto->payload_in_reply_to)
+	    talloc_free (msg_crypto->payload_in_reply_to);
+	msg_crypto->payload_in_reply_to = talloc_strdup (msg_crypto, in_reply_to);
+    }
+    if (references) {
+	if (msg_crypto->payload_references)
+	    talloc_free (msg_crypto->payload_references);
+	msg_crypto->payload_references = talloc_strdup (msg_crypto, references);
     }
 
     return true;

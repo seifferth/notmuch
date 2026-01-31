@@ -770,6 +770,10 @@ _notmuch_message_index_file (notmuch_message_t *message,
     if (msg_crypto && msg_crypto->payload_date) {
 	_notmuch_message_update_date (message, msg_crypto->payload_date);
     }
+    if (msg_crypto && msg_crypto->payload_message_id) {
+	_notmuch_message_gen_terms (message, "id", msg_crypto->payload_message_id);
+	_notmuch_message_update_message_id (message, msg_crypto->payload_message_id);
+    }
     if (msg_crypto && (msg_crypto->payload_to ||
 		       msg_crypto->payload_cc ||
 		       msg_crypto->payload_bcc)) {

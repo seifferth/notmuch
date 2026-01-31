@@ -745,7 +745,9 @@ format_part_sprinter (const void *ctx, sprinter_t *sp, mime_node_t *node,
 		    if (msg_crypto->payload_subject || msg_crypto->payload_from ||
 			msg_crypto->payload_to || msg_crypto->payload_cc ||
 			msg_crypto->payload_bcc || msg_crypto->payload_reply_to ||
-			msg_crypto->payload_date || msg_crypto->payload_autocrypt) {
+			msg_crypto->payload_date || msg_crypto->payload_autocrypt ||
+			msg_crypto->payload_message_id || msg_crypto->payload_in_reply_to ||
+			msg_crypto->payload_references) {
 			sp->map_key (sp, "headers");
 			sp->begin_list (sp);
 			if (msg_crypto->payload_subject)
@@ -764,6 +766,12 @@ format_part_sprinter (const void *ctx, sprinter_t *sp, mime_node_t *node,
 			    sp->string (sp, "Date");
 			if (msg_crypto->payload_autocrypt)
 			    sp->string (sp, "Autocrypt");
+			if (msg_crypto->payload_message_id)
+			    sp->string (sp, "Message-ID");
+			if (msg_crypto->payload_in_reply_to)
+			    sp->string (sp, "In-Reply-To");
+			if (msg_crypto->payload_references)
+			    sp->string (sp, "References");
 			sp->end (sp);
 		    }
 		    sp->end (sp);

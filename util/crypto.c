@@ -128,6 +128,8 @@ _notmuch_message_crypto_destructor (_notmuch_message_crypto_t *msg_crypto)
 	talloc_free (msg_crypto->payload_reply_to);
     if (msg_crypto->payload_date)
 	talloc_free (msg_crypto->payload_date);
+    if (msg_crypto->payload_autocrypt)
+	talloc_free (msg_crypto->payload_autocrypt);
     return 0;
 }
 
@@ -184,6 +186,7 @@ _notmuch_message_crypto_potential_payload (_notmuch_message_crypto_t *msg_crypto
     const char *bcc = NULL;
     const char *reply_to = NULL;
     const char *date = NULL;
+    const char *autocrypt = NULL;
 
     if ((! msg_crypto) || (! part))
 	INTERNAL_ERROR ("_notmuch_message_crypto_potential_payload() got NULL for %s\n",
@@ -244,6 +247,7 @@ _notmuch_message_crypto_potential_payload (_notmuch_message_crypto_t *msg_crypto
 	    bcc = g_mime_object_get_header (part, "Bcc");
 	    reply_to = g_mime_object_get_header (part, "Reply-To");
 	    date = g_mime_object_get_header (part, "Date");
+	    autocrypt = g_mime_object_get_header (part, "Autocrypt");
 	    /* FIXME: possibly add even more headers at some point */
 	} else if (protected_headers && strcasecmp ("v1", protected_headers) == 0) {
 	    subject = g_mime_object_get_header (part, "Subject");
@@ -255,6 +259,14 @@ _notmuch_message_crypto_potential_payload (_notmuch_message_crypto_t *msg_crypto
 	    /* FIXME: Add support for the Followup-To header -- which is the last
 	     * header both supported by draft-autocrypt-lamps-protected-headers and
 	     * still missing from this implementation. */
+	    /* The Autocrypt header is not explicitly mentioned as supported in
+	     * draft-autocrypt-lamps-protected-headers. However, some old versions of
+	     * Delta Chat did produce messages where the Autocrypt header is included
+	     * only in the protected headers but where hp="cipher" is not yet used as
+	     * a content-type parameter. Therefore, it seems desirable to cover this
+	     * case as well.
+	     */
+	    autocrypt = g_mime_object_get_header (part, "Autocrypt");
 	}
     }
 
@@ -292,6 +304,11 @@ _notmuch_message_crypto_potential_payload (_notmuch_message_crypto_t *msg_crypto
 	if (msg_crypto->payload_date)
 	    talloc_free (msg_crypto->payload_date);
 	msg_crypto->payload_date = talloc_strdup (msg_crypto, date);
+    }
+    if (autocrypt) {
+	if (msg_crypto->payload_autocrypt)
+	    talloc_free (msg_crypto->payload_autocrypt);
+	msg_crypto->payload_autocrypt = talloc_strdup (msg_crypto, autocrypt);
     }
 
     return true;

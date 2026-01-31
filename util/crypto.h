@@ -71,6 +71,7 @@ typedef struct _notmuch_message_crypto {
     char *payload_bcc;
     char *payload_reply_to;
     char *payload_date;
+    char *payload_autocrypt;
 
     /* if both signed and encrypted, was the signature encrypted? */
     bool signature_encrypted;

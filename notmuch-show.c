@@ -334,6 +334,12 @@ format_headers_sprinter (sprinter_t *sp, GMimeMessage *message,
 	    sp->string (sp, g_mime_message_get_date_string (sp, message));
     }
 
+    sp->map_key (sp, "Autocrypt");
+    if (msg_crypto && msg_crypto->payload_autocrypt) {
+	sp->string (sp, msg_crypto->payload_autocrypt);
+    } else
+	sp->string (sp, g_mime_object_get_header (GMIME_OBJECT (message), "Autocrypt"));
+
     /* Output extra headers the user has configured, if any */
     if (! reply)
 	format_extra_headers_sprinter (sp, message);

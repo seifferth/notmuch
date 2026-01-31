@@ -1073,6 +1073,12 @@ _notmuch_message_index_file (notmuch_message_t *message,
 	*references = strdup(msg_crypto->payload_references);
     }
 
+    if (msg_crypto && msg_crypto->payload_autocrypt) {
+	_notmuch_message_add_term (message, "tag", "autocrypt");
+    } else if (g_mime_object_get_header (GMIME_OBJECT(mime_message), "Autocrypt")) {
+	_notmuch_message_add_term (message, "tag", "autocrypt");
+    }
+
     talloc_free (msg_crypto);
 
     return NOTMUCH_STATUS_SUCCESS;

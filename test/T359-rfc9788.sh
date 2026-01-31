@@ -20,7 +20,6 @@ test_json_nodes <<<"$output" \
                 'date:[0][0][0]["headers"]["Date"]="Wed, 20 Aug 2025 09:00:00 +0000"'
 
 test_begin_subtest "verify protected headers are shown with decryption"
-test_subtest_known_broken
 output=$(notmuch show --decrypt=true --format=json id:rfc9788_msg001@crypto.notmuchmail.org)
 test_json_nodes <<<"$output" \
                 'from:[0][0][0]["headers"]["From"]="Charlie <test_suite@notmuchmail.org>"' \
@@ -65,22 +64,18 @@ test_expect_equal "$output" 'id:rfc9788_msg003@crypto.notmuchmail.org'
 test_begin_subtest "verify indexing works as expected (2/3) -- reindex"
 test_expect_success 'notmuch reindex --decrypt=true id:rfc9788_msg001@crypto.notmuchmail.org or id:rfc9788_msg002@crypto.notmuchmail.org or id:rfc9788_msg003@crypto.notmuchmail.org'
 test_begin_subtest "verify indexing works as expected (2/3) -- decrypted from"
-test_subtest_known_broken
 output=$(notmuch search --output=messages id:rfc9788_msg001@crypto.notmuchmail.org from:Charlie)
 test_expect_equal "$output" 'id:rfc9788_msg001@crypto.notmuchmail.org'
 test_begin_subtest "verify indexing works as expected (2/3) -- decrypted to:Alice"
-test_subtest_known_broken
 output=$(notmuch search --output=messages id:rfc9788_msg001@crypto.notmuchmail.org to:Alice)
 test_expect_equal "$output" 'id:rfc9788_msg001@crypto.notmuchmail.org'
 test_begin_subtest "verify indexing works as expected (2/3) -- decrypted to:Bob"
-test_subtest_known_broken
 output=$(notmuch search --output=messages id:rfc9788_msg001@crypto.notmuchmail.org to:Bob)
 test_expect_equal "$output" 'id:rfc9788_msg001@crypto.notmuchmail.org'
 test_begin_subtest "verify indexing works as expected (2/3) -- decrypted subject"
 output=$(notmuch search --output=messages id:rfc9788_msg001@crypto.notmuchmail.org subject:Secret)
 test_expect_equal "$output" 'id:rfc9788_msg001@crypto.notmuchmail.org'
 test_begin_subtest "verify indexing works as expected (2/3) -- decrypted date"
-test_subtest_known_broken
 output=$(notmuch search --output=messages id:rfc9788_msg001@crypto.notmuchmail.org date:2025-09-23)
 test_expect_equal "$output" 'id:rfc9788_msg001@crypto.notmuchmail.org'
 test_begin_subtest "verify indexing works as expected (2/3) -- decrypted thread structure (msg001)"

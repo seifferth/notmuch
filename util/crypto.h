@@ -64,6 +64,14 @@ typedef struct _notmuch_message_crypto {
      * UTF-8 */
     char *payload_subject;
 
+    /* other protected headers */
+    char *payload_from;
+    char *payload_to;
+    char *payload_cc;
+    char *payload_bcc;
+    char *payload_reply_to;
+    char *payload_date;
+
     /* if both signed and encrypted, was the signature encrypted? */
     bool signature_encrypted;
 } _notmuch_message_crypto_t;

@@ -1301,11 +1301,8 @@ _notmuch_message_set_author (notmuch_message_t *message,
     return;
 }
 
-void
-_notmuch_message_set_header_values (notmuch_message_t *message,
-				    const char *date,
-				    const char *from,
-				    const char *subject)
+time_t
+_notmuch_rfc_date_to_timestamp (const char *date)
 {
     time_t time_value;
 
@@ -1321,9 +1318,17 @@ _notmuch_message_set_header_values (notmuch_message_t *message,
 	if (time_value < 0)
 	    time_value = 0;
     }
+    return time_value;
+}
 
+void
+_notmuch_message_set_header_values (notmuch_message_t *message,
+				    const char *date,
+				    const char *from,
+				    const char *subject)
+{
     message->doc.add_value (NOTMUCH_VALUE_TIMESTAMP,
-			    Xapian::sortable_serialise (time_value));
+			    Xapian::sortable_serialise (_notmuch_rfc_date_to_timestamp(date)));
     message->doc.add_value (NOTMUCH_VALUE_FROM, from);
     message->doc.add_value (NOTMUCH_VALUE_SUBJECT, subject);
     message->modified = true;
@@ -1334,6 +1339,31 @@ _notmuch_message_update_subject (notmuch_message_t *message,
 				 const char *subject)
 {
     message->doc.add_value (NOTMUCH_VALUE_SUBJECT, subject);
+    message->modified = true;
+}
+
+void
+_notmuch_message_update_from (notmuch_message_t *message,
+				 const char *from)
+{
+    message->doc.add_value (NOTMUCH_VALUE_FROM, from);
+    message->modified = true;
+}
+
+void
+_notmuch_message_update_date (notmuch_message_t *message,
+				 const char *date)
+{
+    message->doc.add_value (NOTMUCH_VALUE_TIMESTAMP,
+			    Xapian::sortable_serialise (_notmuch_rfc_date_to_timestamp(date)));
+    message->modified = true;
+}
+
+void
+_notmuch_message_update_message_id (notmuch_message_t *message,
+				 const char *message_id)
+{
+    message->doc.add_value (NOTMUCH_VALUE_MESSAGE_ID, message_id);
     message->modified = true;
 }
 

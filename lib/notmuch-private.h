@@ -351,6 +351,14 @@ _notmuch_message_update_subject (notmuch_message_t *message,
 				 const char *subject);
 
 void
+_notmuch_message_update_from (notmuch_message_t *message,
+				 const char *from);
+
+void
+_notmuch_message_update_date (notmuch_message_t *message,
+				 const char *date);
+
+void
 _notmuch_message_upgrade_last_mod (notmuch_message_t *message);
 
 void

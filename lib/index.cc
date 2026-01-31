@@ -763,6 +763,32 @@ _notmuch_message_index_file (notmuch_message_t *message,
 	_notmuch_message_gen_terms (message, "subject", msg_crypto->payload_subject);
 	_notmuch_message_update_subject (message, msg_crypto->payload_subject);
     }
+    if (msg_crypto && msg_crypto->payload_from) {
+	_notmuch_message_gen_terms (message, "from", msg_crypto->payload_from);
+	_notmuch_message_update_from (message, msg_crypto->payload_from);
+    }
+    if (msg_crypto && msg_crypto->payload_date) {
+	_notmuch_message_update_date (message, msg_crypto->payload_date);
+    }
+    if (msg_crypto && (msg_crypto->payload_to ||
+		       msg_crypto->payload_cc ||
+		       msg_crypto->payload_bcc)) {
+	GMimeParserOptions *opts;
+	opts = g_mime_parser_options_get_default();
+	if (msg_crypto->payload_to) {
+	    _index_address_list (message, "to",
+		internet_address_list_parse(opts, msg_crypto->payload_to));
+	}
+	if (msg_crypto->payload_cc) {
+	    _index_address_list (message, "to",
+		internet_address_list_parse(opts, msg_crypto->payload_cc));
+	}
+	if (msg_crypto->payload_bcc) {
+	    _index_address_list (message, "to",
+		internet_address_list_parse(opts, msg_crypto->payload_bcc));
+	}
+	g_mime_parser_options_free(opts);
+    }
 
     talloc_free (msg_crypto);
 

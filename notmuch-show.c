@@ -268,33 +268,56 @@ format_headers_sprinter (sprinter_t *sp, GMimeMessage *message,
 	sp->string (sp, g_mime_message_get_subject (message));
 
     sp->map_key (sp, "From");
-    sp->string (sp, g_mime_message_get_from_string (message));
+    if (msg_crypto && msg_crypto->payload_from) {
+	sp->string (sp, msg_crypto->payload_from);
+    } else
+	sp->string (sp, g_mime_message_get_from_string (message));
 
-    recipients_string = g_mime_message_get_address_string (message, GMIME_ADDRESS_TYPE_TO);
-    if (recipients_string) {
+    if (msg_crypto && msg_crypto->payload_to) {
 	sp->map_key (sp, "To");
-	sp->string (sp, recipients_string);
-	g_free (recipients_string);
+	sp->string (sp, msg_crypto->payload_to);
+    } else {
+	recipients_string = g_mime_message_get_address_string (message, GMIME_ADDRESS_TYPE_TO);
+	if (recipients_string) {
+	    sp->map_key (sp, "To");
+	    sp->string (sp, recipients_string);
+	    g_free (recipients_string);
+	}
     }
 
-    recipients_string = g_mime_message_get_address_string (message, GMIME_ADDRESS_TYPE_CC);
-    if (recipients_string) {
+    if (msg_crypto && msg_crypto->payload_cc) {
 	sp->map_key (sp, "Cc");
-	sp->string (sp, recipients_string);
-	g_free (recipients_string);
+	sp->string (sp, msg_crypto->payload_cc);
+    } else {
+	recipients_string = g_mime_message_get_address_string (message, GMIME_ADDRESS_TYPE_CC);
+	if (recipients_string) {
+	    sp->map_key (sp, "Cc");
+	    sp->string (sp, recipients_string);
+	    g_free (recipients_string);
+	}
     }
 
-    recipients_string = g_mime_message_get_address_string (message, GMIME_ADDRESS_TYPE_BCC);
-    if (recipients_string) {
+    if (msg_crypto && msg_crypto->payload_bcc) {
 	sp->map_key (sp, "Bcc");
-	sp->string (sp, recipients_string);
-	g_free (recipients_string);
+	sp->string (sp, msg_crypto->payload_bcc);
+    } else {
+	recipients_string = g_mime_message_get_address_string (message, GMIME_ADDRESS_TYPE_BCC);
+	if (recipients_string) {
+	    sp->map_key (sp, "Bcc");
+	    sp->string (sp, recipients_string);
+	    g_free (recipients_string);
+	}
     }
 
-    reply_to_string = g_mime_message_get_reply_to_string (local, message);
-    if (reply_to_string) {
+    if (msg_crypto && msg_crypto->payload_reply_to) {
 	sp->map_key (sp, "Reply-To");
-	sp->string (sp, reply_to_string);
+	sp->string (sp, msg_crypto->payload_reply_to);
+    } else {
+	reply_to_string = g_mime_message_get_reply_to_string (local, message);
+	if (reply_to_string) {
+	    sp->map_key (sp, "Reply-To");
+	    sp->string (sp, reply_to_string);
+	}
     }
 
     if (reply) {
@@ -305,7 +328,10 @@ format_headers_sprinter (sprinter_t *sp, GMimeMessage *message,
 	sp->string (sp, g_mime_object_get_header (GMIME_OBJECT (message), "References"));
     } else {
 	sp->map_key (sp, "Date");
-	sp->string (sp, g_mime_message_get_date_string (sp, message));
+	if (msg_crypto && msg_crypto->payload_date) {
+	    sp->string (sp, msg_crypto->payload_date);
+	} else
+	    sp->string (sp, g_mime_message_get_date_string (sp, message));
     }
 
     /* Output extra headers the user has configured, if any */
@@ -710,10 +736,26 @@ format_part_sprinter (const void *ctx, sprinter_t *sp, mime_node_t *node,
 			sp->map_key (sp, "encrypted");
 			sp->boolean (sp, msg_crypto->signature_encrypted);
 		    }
-		    if (msg_crypto->payload_subject) {
+		    if (msg_crypto->payload_subject || msg_crypto->payload_from ||
+			msg_crypto->payload_to || msg_crypto->payload_cc ||
+			msg_crypto->payload_bcc || msg_crypto->payload_reply_to ||
+			msg_crypto->payload_date) {
 			sp->map_key (sp, "headers");
 			sp->begin_list (sp);
-			sp->string (sp, "Subject");
+			if (msg_crypto->payload_subject)
+			    sp->string (sp, "Subject");
+			if (msg_crypto->payload_from)
+			    sp->string (sp, "From");
+			if (msg_crypto->payload_to)
+			    sp->string (sp, "To");
+			if (msg_crypto->payload_cc)
+			    sp->string (sp, "Cc");
+			if (msg_crypto->payload_bcc)
+			    sp->string (sp, "Bcc");
+			if (msg_crypto->payload_reply_to)
+			    sp->string (sp, "Reply-To");
+			if (msg_crypto->payload_date)
+			    sp->string (sp, "Date");
 			sp->end (sp);
 		    }
 		    sp->end (sp);

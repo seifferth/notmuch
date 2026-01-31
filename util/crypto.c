@@ -118,6 +118,16 @@ _notmuch_message_crypto_destructor (_notmuch_message_crypto_t *msg_crypto)
 	g_object_unref (msg_crypto->sig_list);
     if (msg_crypto->payload_subject)
 	talloc_free (msg_crypto->payload_subject);
+    if (msg_crypto->payload_from)
+	talloc_free (msg_crypto->payload_from);
+    if (msg_crypto->payload_to)
+	talloc_free (msg_crypto->payload_to);
+    if (msg_crypto->payload_cc)
+	talloc_free (msg_crypto->payload_cc);
+    if (msg_crypto->payload_reply_to)
+	talloc_free (msg_crypto->payload_reply_to);
+    if (msg_crypto->payload_date)
+	talloc_free (msg_crypto->payload_date);
     return 0;
 }
 
@@ -168,6 +178,12 @@ _notmuch_message_crypto_potential_payload (_notmuch_message_crypto_t *msg_crypto
     const char *hp = NULL;
     const char *forwarded = NULL;
     const char *subject = NULL;
+    const char *from = NULL;
+    const char *to = NULL;
+    const char *cc = NULL;
+    const char *bcc = NULL;
+    const char *reply_to = NULL;
+    const char *date = NULL;
 
     if ((! msg_crypto) || (! part))
 	INTERNAL_ERROR ("_notmuch_message_crypto_potential_payload() got NULL for %s\n",
@@ -222,10 +238,23 @@ _notmuch_message_crypto_potential_payload (_notmuch_message_crypto_t *msg_crypto
 	protected_headers = g_mime_object_get_content_type_parameter (part, "protected-headers");
 	if (hp && (strcmp ("cipher", hp) || strcmp ("clear", hp))) {
 	    subject = g_mime_object_get_header (part, "Subject");
-	    /* FIXME: handle more than just Subject: at some point */
+	    from = g_mime_object_get_header (part, "From");
+	    to = g_mime_object_get_header (part, "To");
+	    cc = g_mime_object_get_header (part, "Cc");
+	    bcc = g_mime_object_get_header (part, "Bcc");
+	    reply_to = g_mime_object_get_header (part, "Reply-To");
+	    date = g_mime_object_get_header (part, "Date");
+	    /* FIXME: possibly add even more headers at some point */
 	} else if (protected_headers && strcasecmp ("v1", protected_headers) == 0) {
 	    subject = g_mime_object_get_header (part, "Subject");
-	    /* FIXME: handle more than just Subject: at some point */
+	    from = g_mime_object_get_header (part, "From");
+	    to = g_mime_object_get_header (part, "To");
+	    cc = g_mime_object_get_header (part, "Cc");
+	    date = g_mime_object_get_header (part, "Date");
+	    reply_to = g_mime_object_get_header (part, "Reply-To");
+	    /* FIXME: Add support for the Followup-To header -- which is the last
+	     * header both supported by draft-autocrypt-lamps-protected-headers and
+	     * still missing from this implementation. */
 	}
     }
 
@@ -233,6 +262,36 @@ _notmuch_message_crypto_potential_payload (_notmuch_message_crypto_t *msg_crypto
 	if (msg_crypto->payload_subject)
 	    talloc_free (msg_crypto->payload_subject);
 	msg_crypto->payload_subject = talloc_strdup (msg_crypto, subject);
+    }
+    if (from) {
+	if (msg_crypto->payload_from)
+	    talloc_free (msg_crypto->payload_from);
+	msg_crypto->payload_from = talloc_strdup (msg_crypto, from);
+    }
+    if (to) {
+	if (msg_crypto->payload_to)
+	    talloc_free (msg_crypto->payload_to);
+	msg_crypto->payload_to = talloc_strdup (msg_crypto, to);
+    }
+    if (cc) {
+	if (msg_crypto->payload_cc)
+	    talloc_free (msg_crypto->payload_cc);
+	msg_crypto->payload_cc = talloc_strdup (msg_crypto, cc);
+    }
+    if (bcc) {
+	if (msg_crypto->payload_bcc)
+	    talloc_free (msg_crypto->payload_bcc);
+	msg_crypto->payload_bcc = talloc_strdup (msg_crypto, bcc);
+    }
+    if (reply_to) {
+	if (msg_crypto->payload_reply_to)
+	    talloc_free (msg_crypto->payload_reply_to);
+	msg_crypto->payload_reply_to = talloc_strdup (msg_crypto, reply_to);
+    }
+    if (date) {
+	if (msg_crypto->payload_date)
+	    talloc_free (msg_crypto->payload_date);
+	msg_crypto->payload_date = talloc_strdup (msg_crypto, date);
     }
 
     return true;

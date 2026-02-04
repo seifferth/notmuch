@@ -77,7 +77,6 @@ test_subtest_known_broken
 output=$(notmuch search --output=messages id:rfc9788_msg001@crypto.notmuchmail.org to:Bob)
 test_expect_equal "$output" 'id:rfc9788_msg001@crypto.notmuchmail.org'
 test_begin_subtest "verify indexing works as expected (2/3) -- decrypted subject"
-test_subtest_known_broken
 output=$(notmuch search --output=messages id:rfc9788_msg001@crypto.notmuchmail.org subject:Secret)
 test_expect_equal "$output" 'id:rfc9788_msg001@crypto.notmuchmail.org'
 test_begin_subtest "verify indexing works as expected (2/3) -- decrypted date"

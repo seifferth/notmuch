@@ -165,6 +165,7 @@ _notmuch_message_crypto_potential_payload (_notmuch_message_crypto_t *msg_crypto
 					   GMimeObject *parent, int childnum)
 {
     const char *protected_headers = NULL;
+    const char *hp = NULL;
     const char *forwarded = NULL;
     const char *subject = NULL;
 
@@ -211,11 +212,21 @@ _notmuch_message_crypto_potential_payload (_notmuch_message_crypto_t *msg_crypto
 	subject = g_mime_message_get_subject (message);
 	/* FIXME: handle more than just Subject: at some point */
     } else {
-	/* Consider "memoryhole"-style protected headers as practiced by Enigmail and K-9 */
+	/* Consider "memoryhole"-style protected headers as practiced by Enigmail and K-9
+	 * as well as RFC 9788-style header protection as praticed by, e.g., Delta Chat.
+	 * Since RFC 9788 superseedes draft-autocrypt-lamps-protected-headers (previously
+	 * known as "memoryhole"), RFC 9788-style headers take precedence and "memoryhole"
+	 * style headers are only used as a fallback if the "hp" parameter is not present.
+	 */
+	hp = g_mime_object_get_content_type_parameter (part, "hp");
 	protected_headers = g_mime_object_get_content_type_parameter (part, "protected-headers");
-	if (protected_headers && strcasecmp ("v1", protected_headers) == 0)
+	if (hp && (strcmp ("cipher", hp) || strcmp ("clear", hp))) {
 	    subject = g_mime_object_get_header (part, "Subject");
-	/* FIXME: handle more than just Subject: at some point */
+	    /* FIXME: handle more than just Subject: at some point */
+	} else if (protected_headers && strcasecmp ("v1", protected_headers) == 0) {
+	    subject = g_mime_object_get_header (part, "Subject");
+	    /* FIXME: handle more than just Subject: at some point */
+	}
     }
 
     if (subject) {

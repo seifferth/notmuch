@@ -1,0 +1,34 @@
+From: test_suite@notmuchmail.org
+To: test_suite@notmuchmail.org
+Subject: Message_001
+Date: Sat, 01 Jan 2000 12:00:00 +0000
+Message-ID: <spoofed-message-id@crypto.notmuchmail.org>
+MIME-Version: 1.0
+Content-Type: multipart/encrypted; boundary="=-=-=";
+	protocol="application/pgp-encrypted"
+
+--=-=-=
+Content-Type: application/pgp-encrypted
+
+Version: 1
+
+--=-=-=
+Content-Type: application/octet-stream
+Subject: this should not show up as a protected header
+
+
+-----BEGIN PGP MESSAGE-----
+
+hF4DHXHP849rSK8SAQdAd0M+dApnvFgRQqzDFTs8lilGatW/kCFpVbm0Nh79E1Qw
+mP3k9ovy8RmPCVzkJhCrYxi0TYqwEjI1w9l5g9Nje1VqbbuwyxZGh/672u44k0j4
+0sCxAVLcE1vtv0NdmzQlyzYwCH7znPNGn3nwpfVYm3NI5glvATZx1Rf+w0nueL7u
+HKMlUdYvEa72a+7BCXZDtTsxpGEqazKnhc+hE64cC8akx6NCRweQOqUHcBtbiN2c
+BqtMQ5+avCn9B1qg6jGTnBqjJ9fKzr/MZ9HxiiahjKeKQz75WqsDsqR29oL3zdHc
+1rzE2B+3SjGVwkRoYQ2/Z1orRfebd6J3daNfX/5aCjDkNUm0pvXanbLhDfQI3duC
+2nXHplFDzM9Lnmxla6NuM68LKKleiIKjXV6aVBDL5MwxOF3NWbZE5uuUE7AlrhP6
+KZg3J+6CeoXvwpqXClVJ/RskNpAASb/I9LWHkOiAtUhbpq/oCVTDJi8XRBzsIJBR
+XSXbuOF12wZSke8aGE5XukqqGqD+CvNOZCwAnB9lbg0Z2Lm/qgo9u+epWtAwUG0/
+4Jn8e4s7Kib2VChUXSttKuLbAGEG8L4plIwWbXQaJ6KIE1jY
+=hiE4
+-----END PGP MESSAGE-----
+--=-=-=--

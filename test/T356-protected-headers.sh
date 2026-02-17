@@ -24,6 +24,13 @@ test_json_nodes <<<"$output" \
                 'crypto:[0][0][0]["crypto"]={"decrypted": {"status": "full", "header-mask": {"Subject": "Subject Unavailable"}}}' \
                 'subject:[0][0][0]["headers"]["Subject"]="This is a protected header"'
 
+test_begin_subtest "verify protected header is visible with decryption and --body=false"
+test_subtest_known_broken
+output=$(notmuch show --decrypt=true --body=false --format=json id:protected-header@crypto.notmuchmail.org)
+test_json_nodes <<<"$output" \
+                'crypto:[0][0][0]["crypto"]={"decrypted": {"status": "full", "header-mask": {"Subject": "Subject Unavailable"}}}' \
+                'subject:[0][0][0]["headers"]["Subject"]="This is a protected header"'
+
 test_begin_subtest "verify spoofed date is shown without decryption"
 output=$(notmuch show --format=json id:spoofed-date@crypto.notmuchmail.org)
 test_json_nodes <<<"$output" \
@@ -32,6 +39,12 @@ test_json_nodes <<<"$output" \
 test_begin_subtest "verify real date is shown with decryption"
 test_subtest_known_broken
 output=$(notmuch show --decrypt=true --format=json id:spoofed-date@crypto.notmuchmail.org)
+test_json_nodes <<<"$output" \
+                'subject:[0][0][0]["headers"]["Date"]="Wed, 16 Dec 2015 17:19:18 +0100"'
+
+test_begin_subtest "verify real date is shown with decryption and --body=false"
+test_subtest_known_broken
+output=$(notmuch show --decrypt=true --body=false --format=json id:spoofed-date@crypto.notmuchmail.org)
 test_json_nodes <<<"$output" \
                 'subject:[0][0][0]["headers"]["Date"]="Wed, 16 Dec 2015 17:19:18 +0100"'
 
@@ -46,6 +59,12 @@ output=$(notmuch show --decrypt=true --format=json id:spoofed-recipient@crypto.n
 test_json_nodes <<<"$output" \
                 'subject:[0][0][0]["headers"]["To"]="Notmuch Test Suite <test_suite@notmuchmail.org>"'
 
+test_begin_subtest "verify real recipient is shown with decryption and --body=false"
+test_subtest_known_broken
+output=$(notmuch show --decrypt=true --body=false --format=json id:spoofed-recipient@crypto.notmuchmail.org)
+test_json_nodes <<<"$output" \
+                'subject:[0][0][0]["headers"]["To"]="Notmuch Test Suite <test_suite@notmuchmail.org>"'
+
 test_begin_subtest "verify spoofed sender is shown without decryption"
 output=$(notmuch show --format=json id:spoofed-sender@crypto.notmuchmail.org)
 test_json_nodes <<<"$output" \
@@ -54,6 +73,12 @@ test_json_nodes <<<"$output" \
 test_begin_subtest "verify real sender is shown with decryption"
 test_subtest_known_broken
 output=$(notmuch show --decrypt=true --format=json id:spoofed-sender@crypto.notmuchmail.org)
+test_json_nodes <<<"$output" \
+                'subject:[0][0][0]["headers"]["From"]="Notmuch Test Suite <test_suite@notmuchmail.org>"'
+
+test_begin_subtest "verify real sender is shown with decryption and --body=false"
+test_subtest_known_broken
+output=$(notmuch show --decrypt=true --body=false --format=json id:spoofed-sender@crypto.notmuchmail.org)
 test_json_nodes <<<"$output" \
                 'subject:[0][0][0]["headers"]["From"]="Notmuch Test Suite <test_suite@notmuchmail.org>"'
 

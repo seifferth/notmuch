@@ -1000,7 +1000,9 @@ _notmuch_message_index_user_headers (notmuch_message_t *message, GMimeMessage *m
 notmuch_status_t
 _notmuch_message_index_file (notmuch_message_t *message,
 			     notmuch_indexopts_t *indexopts,
-			     notmuch_message_file_t *message_file)
+			     notmuch_message_file_t *message_file,
+			     const char **in_reply_to,
+			     const char **references)
 {
     GMimeMessage *mime_message;
     InternetAddressList *addresses;
@@ -1026,6 +1028,9 @@ _notmuch_message_index_file (notmuch_message_t *message,
 
     subject = g_mime_message_get_subject (mime_message);
     _notmuch_message_gen_terms (message, "subject", subject);
+
+    *in_reply_to = _notmuch_message_file_get_header (message_file, "in-reply-to");
+    *references = _notmuch_message_file_get_header (message_file, "references");
 
     status = _notmuch_message_index_user_headers (message, mime_message);
 
@@ -1060,6 +1065,12 @@ _notmuch_message_index_file (notmuch_message_t *message,
 		internet_address_list_parse(opts, msg_crypto->payload_bcc));
 	}
 	g_mime_parser_options_free(opts);
+    }
+    if (msg_crypto && msg_crypto->payload_in_reply_to) {
+	*in_reply_to = strdup(msg_crypto->payload_in_reply_to);
+    }
+    if (msg_crypto && msg_crypto->payload_references) {
+	*references = strdup(msg_crypto->payload_references);
     }
 
     talloc_free (msg_crypto);

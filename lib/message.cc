@@ -2313,6 +2313,8 @@ notmuch_message_reindex (notmuch_message_t *message,
 
 	const char *date;
 	const char *from, *to, *subject;
+	const char *in_reply_to = NULL;
+	const char *references = NULL;
 	char *message_id = NULL;
 	const char *thread_id = NULL;
 
@@ -2330,10 +2332,30 @@ notmuch_message_reindex (notmuch_message_t *message,
 
 	/* XXX TODO: deal with changing message id? */
 
+	/*
+	 * XXX TODO: unlink message from references that have disappeared.
+	 * This is particularly relevant for `reindex --decrypt=false`. If
+	 * a reference is only included in the protected headers, reindexing
+	 * without encryption should remove this reference from the database.
+	 */
+
 	_notmuch_message_add_filename (message, filename);
 
+	/* Take header values only from first filename */
+	if (found == 0)
+	    _notmuch_message_set_header_values (message, date, from, subject);
+
+	ret = _notmuch_message_index_file (message, indexopts, message_file,
+					   &in_reply_to, &references);
+
+	if (ret == NOTMUCH_STATUS_FILE_ERROR)
+	    continue;
+	if (ret)
+	    goto DONE;
+
 	ret = _notmuch_database_link_message_to_parents (notmuch, message,
-							 message_file,
+							 in_reply_to,
+							 references,
 							 &thread_id);
 	if (ret)
 	    goto DONE;
@@ -2343,17 +2365,6 @@ notmuch_message_reindex (notmuch_message_t *message,
 
 	ret = COERCE_STATUS (_notmuch_message_add_term (message, "thread", thread_id),
 			     "adding thread term");
-	if (ret)
-	    goto DONE;
-
-	/* Take header values only from first filename */
-	if (found == 0)
-	    _notmuch_message_set_header_values (message, date, from, subject);
-
-	ret = _notmuch_message_index_file (message, indexopts, message_file);
-
-	if (ret == NOTMUCH_STATUS_FILE_ERROR)
-	    continue;
 	if (ret)
 	    goto DONE;
 

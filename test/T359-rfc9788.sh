@@ -79,19 +79,16 @@ test_begin_subtest "verify indexing works as expected (2/3) -- decrypted date"
 output=$(notmuch search --output=messages id:rfc9788_msg001@crypto.notmuchmail.org date:2025-09-23)
 test_expect_equal "$output" 'id:rfc9788_msg001@crypto.notmuchmail.org'
 test_begin_subtest "verify indexing works as expected (2/3) -- decrypted thread structure (msg001)"
-test_subtest_known_broken
 output=$(notmuch show --entire-thread=true id:rfc9788_msg001@crypto.notmuchmail.org | grep $'\fmessage{ id:' | sed 's/^.message{ //;s/ .*//')
 test_expect_equal "$output" 'id:rfc9788_msg001@crypto.notmuchmail.org
 id:rfc9788_msg002@crypto.notmuchmail.org
 id:rfc9788_msg003@crypto.notmuchmail.org'
 test_begin_subtest "verify indexing works as expected (2/3) -- decrypted thread structure (msg002)"
-test_subtest_known_broken
 output=$(notmuch show --entire-thread=true id:rfc9788_msg002@crypto.notmuchmail.org | grep $'\fmessage{ id:' | sed 's/^.message{ //;s/ .*//')
 test_expect_equal "$output" 'id:rfc9788_msg001@crypto.notmuchmail.org
 id:rfc9788_msg002@crypto.notmuchmail.org
 id:rfc9788_msg003@crypto.notmuchmail.org'
 test_begin_subtest "verify indexing works as expected (2/3) -- decrypted thread structure (msg003)"
-test_subtest_known_broken
 output=$(notmuch show --entire-thread=true id:rfc9788_msg003@crypto.notmuchmail.org | grep $'\fmessage{ id:' | sed 's/^.message{ //;s/ .*//')
 test_expect_equal "$output" 'id:rfc9788_msg001@crypto.notmuchmail.org
 id:rfc9788_msg002@crypto.notmuchmail.org
@@ -115,12 +112,15 @@ test_begin_subtest "verify indexing works as expected (3/3) -- hidden date"
 output=$(notmuch search --output=messages id:rfc9788_msg001@crypto.notmuchmail.org date:2025-09-23)
 test_expect_equal "$output" ''
 test_begin_subtest "verify indexing works as expected (3/3) -- hidden thread structure (msg001)"
+test_subtest_known_broken
 output=$(notmuch show --entire-thread=true id:rfc9788_msg001@crypto.notmuchmail.org | grep $'\fmessage{ id:' | sed 's/^.message{ //;s/ .*//')
 test_expect_equal "$output" 'id:rfc9788_msg001@crypto.notmuchmail.org'
 test_begin_subtest "verify indexing works as expected (3/3) -- hidden thread structure (msg002)"
+test_subtest_known_broken
 output=$(notmuch show --entire-thread=true id:rfc9788_msg002@crypto.notmuchmail.org | grep $'\fmessage{ id:' | sed 's/^.message{ //;s/ .*//')
 test_expect_equal "$output" 'id:rfc9788_msg002@crypto.notmuchmail.org'
 test_begin_subtest "verify indexing works as expected (3/3) -- hidden thread structure (msg003)"
+test_subtest_known_broken
 output=$(notmuch show --entire-thread=true id:rfc9788_msg003@crypto.notmuchmail.org | grep $'\fmessage{ id:' | sed 's/^.message{ //;s/ .*//')
 test_expect_equal "$output" 'id:rfc9788_msg003@crypto.notmuchmail.org'
 

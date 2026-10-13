@@ -217,11 +217,12 @@ _my_talloc_free_for_g_hash (void *ptr)
 notmuch_status_t
 _notmuch_database_link_message_to_parents (notmuch_database_t *notmuch,
 					   notmuch_message_t *message,
-					   notmuch_message_file_t *message_file,
+					   const char *in_reply_to,
+					   const char *references,
 					   const char **thread_id)
 {
     GHashTable *parents = NULL;
-    const char *refs, *in_reply_to, *in_reply_to_message_id, *strict_message_id = NULL;
+    const char *in_reply_to_message_id, *strict_message_id = NULL;
     const char *last_ref_message_id, *this_message_id;
     GList *l, *keys = NULL;
     notmuch_status_t ret = NOTMUCH_STATUS_SUCCESS;
@@ -230,12 +231,10 @@ _notmuch_database_link_message_to_parents (notmuch_database_t *notmuch,
 				     _my_talloc_free_for_g_hash, NULL);
     this_message_id = notmuch_message_get_message_id (message);
 
-    refs = _notmuch_message_file_get_header (message_file, "references");
     last_ref_message_id = parse_references (message,
 					    this_message_id,
-					    parents, refs);
+					    parents, references);
 
-    in_reply_to = _notmuch_message_file_get_header (message_file, "in-reply-to");
     if (in_reply_to)
 	strict_message_id = _notmuch_message_id_parse_strict (message,
 							      in_reply_to);
@@ -403,7 +402,8 @@ _consume_metadata_thread_id (void *ctx, notmuch_database_t *notmuch,
 static notmuch_status_t
 _notmuch_database_link_message (notmuch_database_t *notmuch,
 				notmuch_message_t *message,
-				notmuch_message_file_t *message_file,
+				const char *in_reply_to,
+				const char *references,
 				bool is_ghost,
 				bool is_new)
 {
@@ -424,7 +424,8 @@ _notmuch_database_link_message (notmuch_database_t *notmuch,
     }
 
     status = _notmuch_database_link_message_to_parents (notmuch, message,
-							message_file,
+							in_reply_to,
+							references,
 							&thread_id);
     if (status)
 	goto DONE;
@@ -475,6 +476,8 @@ notmuch_database_index_file (notmuch_database_t *notmuch,
 
     const char *date;
     const char *from, *to, *subject;
+    const char *in_reply_to = NULL;
+    const char *references = NULL;
     char *message_id = NULL;
 
     if (message_ret)
@@ -540,11 +543,6 @@ notmuch_database_index_file (notmuch_database_t *notmuch,
 		_notmuch_message_remove_term (message, "type", "ghost");
 	}
 
-	ret = _notmuch_database_link_message (notmuch, message,
-					      message_file, is_ghost, is_new);
-	if (ret)
-	    goto DONE;
-
 	if (is_new || is_ghost)
 	    _notmuch_message_set_header_values (message, date, from, subject);
 
@@ -553,7 +551,13 @@ notmuch_database_index_file (notmuch_database_t *notmuch,
 	    indexopts = def_indexopts;
 	}
 
-	ret = _notmuch_message_index_file (message, indexopts, message_file);
+	ret = _notmuch_message_index_file (message, indexopts, message_file,
+					   &in_reply_to, &references);
+	if (ret)
+	    goto DONE;
+
+	ret = _notmuch_database_link_message (notmuch, message, in_reply_to,
+					      references, is_ghost, is_new);
 	if (ret)
 	    goto DONE;
 

@@ -1,0 +1,61 @@
+Content-Type: multipart/encrypted; protocol="application/pgp-encrypted";
+	boundary="=-=-="
+MIME-Version: 1.0
+From: <test_suite@notmuchmail.org>
+To: hidden-recipients: ;
+Subject: [...]
+Date: Wed, 20 Aug 2025 20:00:00 +0000
+Message-ID: <rfc9788_msg003@crypto.notmuchmail.org>
+
+--=-=-=
+Content-Type: application/pgp-encrypted
+
+Version: 1
+
+--=-=-=
+Content-Type: application/octet-stream; charset="utf-8"
+Content-Transfer-Encoding: 7bit
+
+-----BEGIN PGP MESSAGE-----
+
+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
+=76Mh
+-----END PGP MESSAGE-----
+
+--=-=-=--

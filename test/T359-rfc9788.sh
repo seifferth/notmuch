@@ -130,4 +130,16 @@ test_begin_subtest "verify indexing works as expected (3/3) -- hidden thread str
 output=$(notmuch show --entire-thread=true id:rfc9788_msg003@crypto.notmuchmail.org | grep $'\fmessage{ id:' | sed 's/^.message{ //;s/ .*//')
 test_expect_equal "$output" 'id:rfc9788_msg003@crypto.notmuchmail.org'
 
+test_begin_subtest "verify that legacy display elements are removed (1/2)"
+test_subtest_known_broken
+output=$(notmuch show --decrypt=true --format=json id:rfc9788_legacy_display_01@crypto.notmuchmail.org)
+test_json_nodes <<<"$output" \
+                'message_content:[0][0][0]["body"][0]["content"][1]["content"]="Greetings, Alice and Bob! This message has a legacy display element.\n"'
+
+test_begin_subtest "verify that legacy display elements are removed (2/2)"
+test_subtest_known_broken
+output=$(notmuch show --decrypt=true --format=json id:rfc9788_legacy_display_02@crypto.notmuchmail.org)
+test_json_nodes <<<"$output" \
+                'message_content:[0][0][0]["body"][0]["content"][1]["content"]="Greetings, Alice and Bob! This message has a legacy display element.\n"'
+
 test_done

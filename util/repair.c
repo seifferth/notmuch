@@ -23,6 +23,24 @@
 
 
 static bool
+_notmuch_crypto_payload_has_rfc9788_legacy_display (GMimeObject *payload)
+{
+    const char *hp_legacy_display_parameter;
+
+    hp_legacy_display_parameter =
+	    g_mime_object_get_content_type_parameter (payload,
+						      "hp-legacy-display");
+    if (hp_legacy_display_parameter &&
+	(strcmp (hp_legacy_display_parameter, "\"1\"")) &&
+	((g_mime_content_type_is_type (g_mime_object_get_content_type (payload),
+					"text", "plain")) ||
+	 (g_mime_content_type_is_type (g_mime_object_get_content_type (payload),
+					"text", "html"))))
+	return true;
+    return false;
+}
+
+static bool
 _notmuch_crypto_payload_has_legacy_display (GMimeObject *payload)
 {
     GMimeMultipart *mpayload;
@@ -66,7 +84,20 @@ _notmuch_crypto_payload_has_legacy_display (GMimeObject *payload)
 GMimeObject *
 _notmuch_repair_crypto_payload_skip_legacy_display (GMimeObject *payload)
 {
-    if (_notmuch_crypto_payload_has_legacy_display (payload)) {
+    if (_notmuch_crypto_payload_has_rfc9788_legacy_display (payload)) {
+	if (g_mime_content_type_is_type (g_mime_object_get_content_type (payload),
+					 "text", "plain")) {
+	    /* XXX TODO: Remove the legacy display element! */
+	    return payload;
+	} else if (g_mime_content_type_is_type (g_mime_object_get_content_type (payload),
+					"text", "html")) {
+	    /* XXX TODO: Remove the legacy display element! */
+	    return payload;
+	} else {
+	    /* This should never happen. */
+	    return payload;
+	}
+    } else if (_notmuch_crypto_payload_has_legacy_display (payload)) {
 	return g_mime_multipart_get_part (GMIME_MULTIPART (payload), 1);
     } else {
 	return payload;

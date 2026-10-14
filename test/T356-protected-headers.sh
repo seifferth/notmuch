@@ -159,7 +159,7 @@ for variant in multipart-signed onepart-signed; do
     test_begin_subtest "verify signed PKCS#7 subject ($variant)"
     output=$(notmuch show --verify --format=json "id:smime-${variant}@protected-headers.example")
     test_json_nodes <<<"$output" \
-                    'signed_subject:[0][0][0]["crypto"]["signed"]["headers"]=["Subject"]' \
+                    'signed_subject:[0][0][0]["crypto"]["signed"]["headers"]=["Subject","From","To","Date"]' \
                     'sig_good:[0][0][0]["crypto"]["signed"]["status"][0]["status"]="good"' \
                     'sig_fpr:[0][0][0]["crypto"]["signed"]["status"][0]["fingerprint"]="702BA4B157F1E2B7D16B0C6A5FFC8A7DE2057DEB"' \
                     'not_encrypted:[0][0][0]["crypto"]!"decrypted"'
@@ -175,7 +175,7 @@ for variant in sign+enc sign+enc+legacy-disp; do
     test_begin_subtest "confirm signed and encrypted PKCS#7 subject ($variant)"
     output=$(notmuch show --decrypt=true --format=json "id:smime-${variant}@protected-headers.example")
     test_json_nodes <<<"$output" \
-                    'signed_subject:[0][0][0]["crypto"]["signed"]["headers"]=["Subject"]' \
+                    'signed_subject:[0][0][0]["crypto"]["signed"]["headers"]=["Subject","From","To","Date"]' \
                     'sig_good:[0][0][0]["crypto"]["signed"]["status"][0]["status"]="good"' \
                     'sig_fpr:[0][0][0]["crypto"]["signed"]["status"][0]["fingerprint"]="702BA4B157F1E2B7D16B0C6A5FFC8A7DE2057DEB"' \
                     'encrypted:[0][0][0]["crypto"]["decrypted"]={"status":"full","header-mask":{"Subject":"..."}}'

@@ -247,4 +247,31 @@ test_begin_subtest "verify protected Message-IDs are handled correctly (7/7)"
 output=$(notmuch search --output=messages id:rfc9788_protected_message_id_outer_value@crypto.notmuchmail.org or id:rfc9788_protected_message_id_inner_value@crypto.notmuchmail.org)
 test_expect_equal "$output" "id:rfc9788_protected_message_id_outer_value@crypto.notmuchmail.org"
 
+notmuch config set show.extra_headers X-Custom-Header
+test_begin_subtest "verify that accessing a non-masked custom header without decryption works as expected"
+output=$(notmuch show --decrypt=false --format=json id:rfc9788_non_masked_user_defined_header@crypto.notmuchmail.org)
+test_json_nodes <<<"$output" \
+                'custom_header_value:[0][0][0]["headers"]["X-Custom-Header"]="custom_value_goes_here"'
+test_begin_subtest "verify that accessing a non-masked custom header with decryption works as expected"
+output=$(notmuch show --decrypt=true --format=json id:rfc9788_non_masked_user_defined_header@crypto.notmuchmail.org)
+test_json_nodes <<<"$output" \
+                'custom_header_value:[0][0][0]["headers"]["X-Custom-Header"]="custom_value_goes_here"'
+test_begin_subtest "verify that accessing a hidden custom header with decryption works as expected"
+test_subtest_known_broken
+output=$(notmuch show --decrypt=true --format=json id:rfc9788_hidden_user_defined_header@crypto.notmuchmail.org)
+test_json_nodes <<<"$output" \
+                'custom_header_value:[0][0][0]["headers"]["X-Custom-Header"]="custom_value_goes_here"' \
+                'header_mask:[0][0][0]["crypto"]["decrypted"]["header-mask"]["X-Custom-Header"]=null'
+test_begin_subtest "verify that accessing an intentionally spoofed custom header without decryption works as expected"
+output=$(notmuch show --decrypt=false --format=json id:rfc9788_intentionally_spoofed_user_defined_header@crypto.notmuchmail.org)
+test_json_nodes <<<"$output" \
+                'custom_header_value:[0][0][0]["headers"]["X-Custom-Header"]="this_value_is_phony"'
+test_begin_subtest "verify that accessing an intentionally spoofed custom header with decryption works as expected"
+test_subtest_known_broken
+output=$(notmuch show --decrypt=true --format=json id:rfc9788_intentionally_spoofed_user_defined_header@crypto.notmuchmail.org)
+test_json_nodes <<<"$output" \
+                'custom_header_value:[0][0][0]["headers"]["X-Custom-Header"]="this_value_is_real"' \
+                'header_mask:[0][0][0]["crypto"]["decrypted"]["header-mask"]["X-Custom-Header"]="this_value_is_phony"'
+notmuch config set show.extra_headers
+
 test_done

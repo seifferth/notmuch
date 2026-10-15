@@ -1,0 +1,45 @@
+Content-Type: multipart/encrypted; protocol="application/pgp-encrypted";
+	boundary="=-=-="
+MIME-Version: 1.0
+From: Bob <test_suite@notmuchmail.org>
+To: Alice <alice@example.com>
+Reply-To: Bob <mallory@example.com>
+Subject: [...]
+Date: Thu, 28 Aug 2025 20:00:00 +0000
+Message-ID: <rfc9788_mitm_redirect@crypto.notmuchmail.org>
+
+--=-=-=
+Content-Type: application/pgp-encrypted
+
+Version: 1
+
+--=-=-=
+Content-Type: application/octet-stream; charset="utf-8"
+Content-Transfer-Encoding: 7bit
+
+-----BEGIN PGP MESSAGE-----
+
+wV4DHXHP849rSK8SAQdAv8dmtg6troFwQ+zdCSW31/1cD8iONWKGEnqM87eZbncw
+XSRqyPGHnVQRJdY0L0g2QblugSPGKcqgq8FyC4DQRIblgz0kLlqvRWbpHJZl0wFM
+0sKCAXr+hC0YtrHjhS7c5WMWbctSgxBS15+qNRaWqEdqA3jJI0cKpK13JMSxi5Zf
+A5131HSpDzE3gTr6/5UDgFIwp7dLHUWrQRUQSDMc6LqYEvNaVJMtsJO3nt4pM3Xh
+gYDUZ2ad2AzcEDF3yhjSq4mLQGa4puu8EphmzYcbU63RtXY+Rs176YBPmb1Iue5i
+VhUIy5ket/49GmRSenzdNWrxW4NNJ76ixX4j1fAUcP0rwj+BuGD5IckL8OsTUXYo
+VcffTPrvVB6f8kvQQo+pi93CcYS4Ik6neYtXN8736zV+Iy4K50kk852h7llGtbFc
+87Z3VTbz3+/crGvs4OmqbTIEQISazCQSmP9LM4TcIL48+GXyTa5/PymPT2F5hkQ6
+OcksJ90ODnV4F2U23zKDuirEbplw7i3P7yTOb/do1gUJeXNhglqx4TgMpeQD+k+A
+LhhAdW8NiOXvtyYNEldoVBaSdkgBfH7/fKVNInLXbHLc5lDKcdXMJbWjteKE7bxM
+wGNmAcHh+cs/5dzunguJJDHmHP5tQU81tIUr73GMs1np3xeTxTZl40fwDfSUNdlN
+KG4NvCf1U5SLMzlY9RKAJWZ1sf+Ar5GyPkfgiweLb7mEr7kTUNJJh8+JJCGMDpwV
+kiNu025B3Hn7381ms6vnsfR5BRKGrIa4T05ZOGC7TU+8mtVxJB5nRhbfepR+FR+A
+YWhCZrCEvEHLbVr7/rBbf+yzy6bCsAtseOmStOcvjyPf8iSlyKeqEKmznt78gB/7
+vYfjxfQSARz0qcgmyrnzU+/hBPjmXy79yEEVuctvYYvvwFaW6WIP8PMLJ1fs9Lwc
+hiQqfH8ryeKojDE97S3Snk8CjEpL90WUfNhrjH9M7kks8jHq7dqH+2cvUgkBFNp5
+h1OyvREQHWMZEt0VvOhzgl8ZnSKMjGzHrKsV+5V+pFZhA+twyiS3yrQyrcGC9l9e
+kYNs1I+HKhVV4xhaj5bV0IiThO0hFp75bIoBOG4xwv0IIJSIBpyq2V3gbR1TSEuU
+JT90wpQ9Pz3NPzFEaick7CzSW7U/faY862CvV88KOt/ZO5zYcfbWfX+/XpTKSRjG
+mJx2O/8ofR/Xdw1SDqpIdUOMGaMa
+=Ftqn
+-----END PGP MESSAGE-----
+
+--=-=-=--

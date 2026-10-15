@@ -181,4 +181,10 @@ output=$(notmuch show --decrypt=true --format=json id:rfc9788_spoofed_from_02@cr
 test_json_nodes <<<"$output" \
                 'from:[0][0][0]["headers"]["From"]=""'
 
+test_begin_subtest "guard against MITM'ed outer headers"
+test_subtest_known_broken
+output=$(notmuch show --decrypt=true --format=json id:rfc9788_mitm_redirect@crypto.notmuchmail.org)
+expected=$(notmuch show --decrypt=true --format=json id:rfc9788_mitm_redirect@crypto.notmuchmail.org | sed 's/, *"Reply-To": *"Bob <mallory@example\.com>"//')
+test_expect_equal_json "$output" "$expected"
+
 test_done

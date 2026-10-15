@@ -187,4 +187,40 @@ output=$(notmuch show --decrypt=true --format=json id:rfc9788_mitm_redirect@cryp
 expected=$(notmuch show --decrypt=true --format=json id:rfc9788_mitm_redirect@crypto.notmuchmail.org | sed 's/, *"Reply-To": *"Bob <mallory@example\.com>"//')
 test_expect_equal_json "$output" "$expected"
 
+test_begin_subtest "verify header mask (1/3)"
+test_subtest_known_broken
+output=$(notmuch show --decrypt=true --format=json id:rfc9788_msg001@crypto.notmuchmail.org)
+test_json_nodes <<<"$output" \
+                'from:[0][0][0]["crypto"]["decrypted"]["header-mask"]["From"]="<test_suite@notmuchmail.org>"' \
+                'to:[0][0][0]["crypto"]["decrypted"]["header-mask"]["To"]="hidden-recipients: ;"' \
+                'subject:[0][0][0]["crypto"]["decrypted"]["header-mask"]["Subject"]="[...]"' \
+                'date:[0][0][0]["crypto"]["decrypted"]["header-mask"]["Date"]="Wed, 20 Aug 2025 09:00:00 +0000"'
+test_begin_subtest "verify header mask (2/3)"
+test_subtest_known_broken
+output=$(notmuch show --decrypt=true --format=json id:rfc9788_msg002@crypto.notmuchmail.org)
+test_json_nodes <<<"$output" \
+                'from:[0][0][0]["crypto"]["decrypted"]["header-mask"]["From"]="<test_suite@notmuchmail.org>"' \
+                'to:[0][0][0]["crypto"]["decrypted"]["header-mask"]["To"]="hidden-recipients: ;"' \
+                'subject:[0][0][0]["crypto"]["decrypted"]["header-mask"]["Subject"]="[...]"' \
+                'date:[0][0][0]["crypto"]["decrypted"]["header-mask"]["Date"]="Wed, 20 Aug 2025 08:00:00 +0000"' \
+                'in-reply-to:[0][0][0]["crypto"]["decrypted"]["header-mask"]["In-Reply-To"]=null' \
+                'references:[0][0][0]["crypto"]["decrypted"]["header-mask"]["References"]=null'
+test_begin_subtest "verify header mask (3/3)"
+test_subtest_known_broken
+output=$(notmuch show --decrypt=true --format=json id:rfc9788_msg003@crypto.notmuchmail.org)
+test_json_nodes <<<"$output" \
+                'from:[0][0][0]["crypto"]["decrypted"]["header-mask"]["From"]="<test_suite@notmuchmail.org>"' \
+                'to:[0][0][0]["crypto"]["decrypted"]["header-mask"]["To"]="hidden-recipients: ;"' \
+                'subject:[0][0][0]["crypto"]["decrypted"]["header-mask"]["Subject"]="[...]"' \
+                'date:[0][0][0]["crypto"]["decrypted"]["header-mask"]["Date"]="Wed, 20 Aug 2025 20:00:00 +0000"' \
+                'in-reply-to:[0][0][0]["crypto"]["decrypted"]["header-mask"]["In-Reply-To"]=null' \
+                'references:[0][0][0]["crypto"]["decrypted"]["header-mask"]["References"]=null'
+test_begin_subtest "guard against header guessing attacks"
+test_subtest_known_broken
+output=$(notmuch show --decrypt=true --format=json id:rfc9788_guessing_attack@crypto.notmuchmail.org)
+test_json_nodes <<<"$output" \
+                'subject:[0][0][0]["crypto"]["decrypted"]["header-mask"]["Subject"]="[...]"' \
+                'in-reply-to:[0][0][0]["crypto"]["decrypted"]["header-mask"]["In-Reply-To"]=null' \
+                'references:[0][0][0]["crypto"]["decrypted"]["header-mask"]["References"]=null'
+
 test_done

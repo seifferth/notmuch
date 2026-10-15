@@ -142,4 +142,43 @@ output=$(notmuch show --decrypt=true --format=json id:rfc9788_legacy_display_02@
 test_json_nodes <<<"$output" \
                 'message_content:[0][0][0]["body"][0]["content"][1]["content"]="Greetings, Alice and Bob! This message has a legacy display element.\n"'
 
+# RFC 9788 suggests that a MUA should handle mismatched From headers as
+# follows:
+#
+# 1. When displaying the message, render the outer From header.
+# 2. When replying to the message, use the inner From header.
+#
+# Following this guidance in notmuch is not straightforward, though, since
+# notmuch performs neither of these two functions. (I.e. notmuch just outputs
+# the message which is then rendered by the frontend; and while there is
+# 'notmuch reply', there is no guarantee that the frontend will use it.)
+# This leaves us with two choices:
+#
+# 1. Use the outer From header -- which we can't do because it could easily
+#    lead the frontend to treat the outer From header as authentic in spite
+#    of our knowledge that it has been tampered with.
+# 2. Use the inner From header -- which we can't do because it would introduce
+#    an attack vector for spoofing the From header.
+#
+# Since neither of these options seems acceptable, I decided to clear a
+# mismatched From header instead. This should at least ensure that the user
+# does not use the wrong header accidentally. It might also lead them to
+# investigate the issue in more depth (e.g. by looking at the message's source
+# code) and understand what has happened.
+#
+# Also note that this decision could be discussed further. If such discussion
+# leads to finding a better solution for this problem, the test cases described
+# below should be updated to align with the new expectations.
+#
+test_begin_subtest "guard against From header spoofing (1/2)"
+test_subtest_known_broken
+output=$(notmuch show --decrypt=true --format=json id:rfc9788_spoofed_from_01@crypto.notmuchmail.org)
+test_json_nodes <<<"$output" \
+                'from:[0][0][0]["headers"]["From"]=""'
+test_begin_subtest "guard against From header spoofing (2/2)"
+test_subtest_known_broken
+output=$(notmuch show --decrypt=true --format=json id:rfc9788_spoofed_from_02@crypto.notmuchmail.org)
+test_json_nodes <<<"$output" \
+                'from:[0][0][0]["headers"]["From"]=""'
+
 test_done

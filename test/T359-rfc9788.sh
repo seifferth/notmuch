@@ -223,4 +223,28 @@ test_json_nodes <<<"$output" \
                 'in-reply-to:[0][0][0]["crypto"]["decrypted"]["header-mask"]["In-Reply-To"]=null' \
                 'references:[0][0][0]["crypto"]["decrypted"]["header-mask"]["References"]=null'
 
+test_begin_subtest "verify protected Message-IDs are handled correctly (1/7)"
+output=$(notmuch show --decrypt=false --format=json id:rfc9788_protected_message_id_outer_value@crypto.notmuchmail.org or id:rfc9788_protected_message_id_inner_value@crypto.notmuchmail.org)
+test_json_nodes <<<"$output" \
+                'id:[0][0][0]["id"]="rfc9788_protected_message_id_outer_value@crypto.notmuchmail.org"'
+test_begin_subtest "verify protected Message-IDs are handled correctly (2/7)"
+test_subtest_known_broken
+output=$(notmuch show --decrypt=true --format=json id:rfc9788_protected_message_id_outer_value@crypto.notmuchmail.org or id:rfc9788_protected_message_id_inner_value@crypto.notmuchmail.org)
+test_json_nodes <<<"$output" \
+                'id:[0][0][0]["id"]="rfc9788_protected_message_id_inner_value@crypto.notmuchmail.org"'
+test_begin_subtest "verify protected Message-IDs are handled correctly (3/7)"
+output=$(notmuch search --output=messages id:rfc9788_protected_message_id_outer_value@crypto.notmuchmail.org or id:rfc9788_protected_message_id_inner_value@crypto.notmuchmail.org)
+test_expect_equal "$output" "id:rfc9788_protected_message_id_outer_value@crypto.notmuchmail.org"
+test_begin_subtest "verify protected Message-IDs are handled correctly (4/7) -- reindex with decryption"
+test_expect_success "notmuch reindex --decrypt=true id:rfc9788_protected_message_id_outer_value@crypto.notmuchmail.org or id:rfc9788_protected_message_id_inner_value@crypto.notmuchmail.org"
+test_begin_subtest "verify protected Message-IDs are handled correctly (5/7)"
+test_subtest_known_broken
+output=$(notmuch search --output=messages id:rfc9788_protected_message_id_outer_value@crypto.notmuchmail.org or id:rfc9788_protected_message_id_inner_value@crypto.notmuchmail.org)
+test_expect_equal "$output" "id:rfc9788_protected_message_id_inner_value@crypto.notmuchmail.org"
+test_begin_subtest "verify protected Message-IDs are handled correctly (6/7) -- reindex without decryption"
+test_expect_success "notmuch reindex --decrypt=false id:rfc9788_protected_message_id_outer_value@crypto.notmuchmail.org or id:rfc9788_protected_message_id_inner_value@crypto.notmuchmail.org"
+test_begin_subtest "verify protected Message-IDs are handled correctly (7/7)"
+output=$(notmuch search --output=messages id:rfc9788_protected_message_id_outer_value@crypto.notmuchmail.org or id:rfc9788_protected_message_id_inner_value@crypto.notmuchmail.org)
+test_expect_equal "$output" "id:rfc9788_protected_message_id_outer_value@crypto.notmuchmail.org"
+
 test_done
